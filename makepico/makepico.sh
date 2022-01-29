@@ -70,6 +70,8 @@ make_project() {
     # FROM 1.0.2
     make_vscode "${1}"
 
+    make_gitignore_file "${1}"
+
     # And done...
     project_name=${1:t}
     echo "Project ${project_name} created at ${project_path}"
@@ -291,6 +293,20 @@ check_path() {
             exit 1
         fi
     fi
+}
+
+make_gitignore_file() {
+    echo "Creating .gitignore..."
+
+    {
+        echo ".idea"
+        echo ".vscode"
+        echo "_deps"
+        echo "cmake-*"
+        echo "build"
+        echo ".DS_Store"
+        echo "*.pdf"
+    } >> "${1}/.gitignore"
 }
 
 # Runtime start
