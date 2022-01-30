@@ -31,8 +31,8 @@ show_help() {
     echo -e "\nmakepico 2.2.0\n\nInitialise a Pi Pico Project\n"
     echo -e "Usage:\n  makepico [path/name] [-c] [-d] [-n your name] [-h]\n"
     echo    "Options:"
-    echo    "  -c / --cpp     Set up the project for C++. Default: false"
-    echo    "  -d / --debug   Set up the project for SWD. Default: false"
+    echo    "  -c / --c       Set up the project for C."
+    echo    "  -d / --nodebug Set up the project without SWD debug."
     echo    "  -n / --name    Your name for the comments. Default: <YOU>"
     echo    "  -v / --version The project\'s inital version. Default: 1.0.0"
     echo    "  -h / --help    This help screen"
@@ -93,8 +93,10 @@ make_source_files() {
     project_name=${1:t}
     source_file=${1:t:l}
 
-    write_header "$project_name" "${1}/main.${file_ext}"
-    write_header "$project_name" "${1}/main.h"
+    mkdir "${1}/src"
+
+    write_header "$project_name" "${1}/src/main.${file_ext}"
+    write_header "$project_name" "${1}/src/main.h"
 
     # FROM 2.0.0
     # Write main() function
@@ -107,17 +109,17 @@ make_source_files() {
         echo
         echo '    return 0;'
         echo '}'
-    } >> "${1}/main.${file_ext}"
+    } >> "${1}/src/main.${file_ext}"
 
     # FROM 1.3.0
     # Break into sections for C/C++ usage
 
     # Add header guard
     {
-        echo "#ifndef _${project_name:u}_MAIN_HEADER_"
-        echo "#define _${project_name:u}_MAIN_HEADER_"
+        echo "#ifndef _SRC_MAIN_H"
+        echo "#define _SRC_MAIN_H"
         echo
-    } >> "${1}/main.h"
+    } >> "${1}/src/main.h"
 
     # C++ standard libraries or C standard libraries
     if [[ $do_cpp -eq 1 ]]; then
@@ -132,7 +134,7 @@ make_source_files() {
             echo '#include <cstdint>'
             echo '#include <cstring>'
             echo
-        } >> "${1}/main.h"
+        } >> "${1}/src/main.h"
     else
         {
             echo '/*'
@@ -144,7 +146,7 @@ make_source_files() {
             echo '#include <string.h>'
             echo '#include <time.h>'
             echo
-        } >> "${1}/main.h"
+        } >> "${1}/src/main.h"
     fi
 
     # Standard Pico libraries
@@ -160,7 +162,7 @@ make_source_files() {
         echo '#include "hardware/adc.h"'
         echo '#include "hardware/uart.h"'
         echo
-    } >> "${1}/main.h"
+    } >> "${1}/src/main.h"
 
     if [[ $do_cpp -eq 1 ]]; then
         {
@@ -176,12 +178,12 @@ make_source_files() {
             echo '}'
             echo '#endif'
             echo
-        } >> "${1}/main.h"
+        } >> "${1}/src/main.h"
     fi
 
     {
         echo "#endif // _${project_name:u}_MAIN_HEADER_"
-    } >> "${1}/main.h"
+    } >> "${1}/src/main.h"
 }
 
 write_header() {
@@ -218,7 +220,7 @@ make_cmake_file() {
         echo 'include(pico_sdk_import.cmake)'
         echo "project(${project_name} VERSION ${proj_version})"
         echo "add_executable(\${PROJECT_NAME}"
-        echo "               main.${file_ext})"
+        echo "                src/main.${file_ext})"
         echo
         echo 'pico_sdk_init()'
         echo
@@ -227,12 +229,12 @@ make_cmake_file() {
         echo "pico_add_extra_outputs(\${PROJECT_NAME})"
         echo
         echo "target_link_libraries(\${PROJECT_NAME}"
-        echo '                      pico_stdlib'
-        echo '                      hardware_gpio'
-        echo '                      hardware_i2c'
-        echo '                      hardware_spi'
-        echo '                      hardware_adc'
-        echo '                      hardware_uart)'
+        echo '                        pico_stdlib'
+        echo '                        hardware_gpio'
+        echo '                        hardware_i2c'
+        echo '                        hardware_spi'
+        echo '                        hardware_adc'
+        echo '                        hardware_uart)'
     } >> "${1}/CMakeLists.txt"
 }
 
@@ -312,8 +314,8 @@ make_gitignore_file() {
 # Runtime start
 # Get the arguments, which should be project path(s)
 projects=()
-do_swd=0
-do_cpp=0
+do_swd=1
+do_cpp=1
 users_name="<YOU>"
 proj_version="1.0.0"
 next_is_arg=0
@@ -341,10 +343,10 @@ for arg in "$@"; do
     else
         if   [[ "$upper_arg" == "-N" || "$upper_arg" == "--NAME"  ]]; then
             next_is_arg=1
-        elif [[ "$upper_arg" == "-C" || "$upper_arg" == "--CPP"   ]]; then
-            do_cpp=1
-        elif [[ "$upper_arg" == "-D" || "$upper_arg" == "--DEBUG" ]]; then
-            do_swd=1
+        elif [[ "$upper_arg" == "-C" || "$upper_arg" == "--C"   ]]; then
+            do_cpp=0
+        elif [[ "$upper_arg" == "-D" || "$upper_arg" == "--NODEBUG" ]]; then
+            do_swd=0
         elif [[ "$upper_arg" == "-V" || "$upper_arg" == "--VERSION" ]]; then
             next_is_arg=2
         elif [[ "$upper_arg" == "-H" || "$upper_arg" == "--HELP"  ]]; then
