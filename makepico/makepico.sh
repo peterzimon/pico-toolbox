@@ -72,6 +72,8 @@ make_project() {
 
     make_gitignore_file "${1}"
 
+    make_readme "${1}"
+
     # And done...
     project_name=${1:t}
     echo "Project ${project_name} created at ${project_path}"
@@ -309,6 +311,20 @@ make_gitignore_file() {
         echo ".DS_Store"
         echo "*.pdf"
     } >> "${1}/.gitignore"
+}
+
+make_readme() {
+    echo "Creating README.md"
+
+    {
+        echo "# ${project_name}"
+        # echo ".vscode"
+        echo ""
+        echo "Version: ${proj_version}"
+        echo "Author: ${users_name}"
+        echo "Copyright: $(date +'%Y')"
+        echo "Licence: MIT"
+    } >> "${1}/README.md"
 }
 
 # Runtime start
