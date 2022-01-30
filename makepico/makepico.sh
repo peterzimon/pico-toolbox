@@ -244,7 +244,7 @@ make_vscode() {
     {
         echo '{'
         echo '    "cmake.environment": {'
-        echo "        \"PICO_SDK_PATH\": \"${PICO_SDK_PATH}\""
+        echo '        "PICO_SDK_PATH": "${env:PICO_SDK_PATH}"'
         echo '    },'
         echo '    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"'
         echo '}'
@@ -300,7 +300,7 @@ make_gitignore_file() {
 
     {
         echo ".idea"
-        echo ".vscode"
+        # echo ".vscode"
         echo "_deps"
         echo "cmake-*"
         echo "build"
