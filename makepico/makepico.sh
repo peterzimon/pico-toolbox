@@ -273,7 +273,7 @@ make_vscode() {
             echo '                "/target/rp2040.cfg"'
             echo '            ],'
             echo '            "svdFile": "${env:PICO_SDK_PATH}/src/rp2040/hardware_regs/rp2040.svd",'
-            echo '            "runToMain": true,'
+            echo '            "runToEntryPoint": "main",'
             echo '            "postRestartCommands": ['
             echo '                "break main",'
             echo '                "continue"'
