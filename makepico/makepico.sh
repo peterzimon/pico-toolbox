@@ -218,11 +218,13 @@ make_cmake_file() {
     fi
 
     {
+        echo 'file(GLOB FILES src/*.cpp src/*.h)'
+        echo
         echo 'cmake_minimum_required(VERSION 3.22)'
         echo 'include(pico_sdk_import.cmake)'
         echo "project(${project_name} VERSION ${proj_version})"
         echo "add_executable(\${PROJECT_NAME}"
-        echo "                src/main.${file_ext})"
+        echo "                \${FILES})"
         echo
         echo 'pico_sdk_init()'
         echo
